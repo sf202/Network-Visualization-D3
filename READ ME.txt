@@ -1,0 +1,7 @@
+Santiago Fleiderman
+CSC 4730 Data Visualization
+Project 4
+July 24, 2017
+
+Used Wamp server to read json files and html files. 
+localhost/force_directed_tree_add.html

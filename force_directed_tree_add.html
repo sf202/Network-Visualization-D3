@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+
+    <title>Force-Directed Layout</title>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <style type="text/css">
+      
+label {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  position: absolute;
+  left: 10px;
+  top: 10px;
+}
+
+
+
+	  .link {
+  stroke: #ccc;
+}
+
+.node text {
+  pointer-events: none;
+  font: 10px sans-serif;
+  
+}
+
+
+
+  html, body {
+            height: 25%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            height: 25%;
+        }
+
+
+
+
+
+
+    </style>
+</head>
+<body>
+	<select id="radius">
+	<option value="data/celegansneural.json"> celegansneural.json </option>
+        <option value="data/dolphins.json">dolphins.json</option>
+        <option value="data/football.json">football.json</option>
+        <option value="data/lesmis.json">lesmis.json</option>
+        <option value="data/miserables.json">miserables.json</option>
+    </select>
+    <div id="map"></div>
+
+
+ <center> <span id="title"> </span> 
+
+<label><input style="width:240px;" type="range" min="30" max="100"  id ="linkDistance" > Link Strength</label>
+
+    <script type="text/javascript">
+	/*Force Layout: The principle : The layout moves the graph nodes around a little bit at a time. Eventually (usually) the nodes settle into a comfortable location and the layout stops.
+	//Use lesmis and dolphins*/
+/*r is equal to a linear scale with a domain of 0 to 1 and a range of 5 to 1000.
+Or, a little less mathematically, r will be a function that changes values in the interval [0,1] to values 
+*/		
+	
+		
+		
+		
+        var w = 1500,
+            h = 1000,
+            r = 6;
+            
+
+        
+
+        var svg = d3.select("body").append("svg:svg")
+            .attr("width", w)
+            .attr("height", h);
+			
+			
+			/*named because it's a
+			property that acts like electrical 
+			charge on the nodes. With force-directed graphs in particular
+			, charge causes nodes in the graph to repel each other
+			*/
+			/*gravity. The force layout uses this property to keep nodes from wandering off the edges of the visualization, something they might otherwise do to avoid overlap.
+             Unlike properties from the other examples, gravity applies to the entire force layout and not individual links or nodes.
+			*/
+			
+		
+ 
+ 	var force = d3.layout.force()
+            .charge(-120)
+            .linkDistance(30)
+            .size([w, h]);
+ 
+ 
+		   //  You have to run the whole code again for every change a function that calls it every time you change the filename has the force layout code.
+		   function main(d) {
+    d3.json( d, function (json) {  
+
+			
+			// create a **force** layout object and define its properties.
+            force
+      .nodes(json.nodes)
+      .links(json.links)
+	  //.stop()
+	 // .linkDistance(linkDistance)
+      .start();
+				
+				
+				
+var link = svg.selectAll(".link")
+    .data(json.links)
+  .enter().append("line")
+    .attr("class", "link");
+
+var node = svg.selectAll(".node")
+    .data(json.nodes)
+  .enter().append("g")
+    .attr("class", "node")
+	.call(force.drag)
+	.on("mouseover", function(d)
+ {
+   d3.select(label[0][d.index]).style("visibility","visible")
+ })
+ .on("mouseout", function(d)
+ {
+     d3.select(label[0][d.index]).style("visibility","hidden")
+ })
+.call(force.drag);
+    console.log(node);
+
+	node.append("circle")
+    .attr("r", 5);
+   
+   var label = node.append("text")
+      .attr("dx", "1.5em")
+	  .attr("dy", ".55em")
+      .text(function(d) { return d.name; })
+	 .style("visibility", "hidden");
+
+	 
+	 
+	  
+	  // Update the link and node location at every round of force layout simulation, creating the animation effect.
+ force.on("tick", function() {
+    link.attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+
+    node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+	
+  });	
+});
+}
+
+
+d3.select("#radius").on("change", function() {
+    updateData(this.value);
+});
+
+
+d3.select("#linkDistance").on("input", function(){
+	updatelinkDistance(this.value);
+	
+	 
+
+});
+
+
+function updatelinkDistance(nlinkDistance)
+{
+d3.select("#linkDistance").property("value",nlinkDistance)
+force.stop();
+    force.linkDistance(nlinkDistance);
+    force.start();
+}
+
+
+function updateData(jsonData) {
+    console.log(jsonData);
+	  var line = d3.selectAll("line").remove();
+    var g = d3.selectAll("g").remove();
+    var circles = d3.selectAll("circle").remove();
+    main(jsonData);
+}
+
+
+    </script>
+	
+</body>
+</html>
